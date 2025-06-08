@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import mean_squared_error
 
 # Function to predict values using linear regression (dot product)
 def predict(x, w, b):
@@ -53,6 +52,14 @@ def gradient_descent(X, y, w_in, b_in, cost_function, gradient_function, alpha, 
             print(f"Iteration {i:4d}: Cost {J_history[-1]:8.2f}")
         
     return w, b, J_history
+
+def mean_squared_error_manual(y_true, y_pred):
+    """
+    Tính toán Mean Squared Error (MSE) giữa y_true và y_pred.
+    """
+    n = len(y_true)
+    mse = np.sum((y_true - y_pred) ** 2) / n
+    return mse
 
 # Function to preprocess the data
 def preprocess_data(data):
@@ -114,7 +121,7 @@ def train_model():
     y_pred = np.clip(y_pred, 0, 20)  # Đảm bảo dự đoán nằm trong khoảng 0-20
     
     # Calculate Mean Squared Error (MSE) for the test set
-    mse = mean_squared_error(y_test, y_pred)
+    mse = mean_squared_error_manual(y_test, y_pred)
     print(f'Mean Squared Error on Test Set: {mse}')
     
     # Save the learned parameters and cost history to a file
