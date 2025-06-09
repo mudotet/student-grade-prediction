@@ -1,14 +1,13 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 
-# Function to predict values using linear regression (dot product)
+# Hàm dự đoán giá trị sử dụng hồi quy tuyến tính (tích vô hướng)
 def predict(x, w, b):
     p = np.dot(x, w) + b
     return p
 
-# Function to compute the cost
+# Hàm tính toán chi phí (cost)
 def compute_cost(X, y, w, b): 
     m = X.shape[0]
     cost = 0.0
@@ -18,7 +17,7 @@ def compute_cost(X, y, w, b):
     cost = cost / (2 * m)                                
     return cost
 
-# Function to compute the gradient
+# Hàm tính gradient
 def compute_gradient(X, y, w, b): 
     m, n = X.shape
     dj_dw = np.zeros((n,))
@@ -34,10 +33,10 @@ def compute_gradient(X, y, w, b):
     
     return dj_db, dj_dw
 
-# Function for gradient descent
+# Hàm thực hiện gradient descent
 def gradient_descent(X, y, w_in, b_in, cost_function, gradient_function, alpha, num_iters): 
     J_history = []   
-    w = np.copy(w_in)  # Avoid modifying global w
+    w = np.copy(w_in)  # Tránh thay đổi w toàn cục
     b = b_in
     
     for i in range(num_iters):
@@ -45,11 +44,11 @@ def gradient_descent(X, y, w_in, b_in, cost_function, gradient_function, alpha, 
         w = w - alpha * dj_dw
         b = b - alpha * dj_db
         
-        if i < 100000:  # Prevent resource exhaustion
+        if i < 100000:  # Ngăn ngừa tràn bộ nhớ
             J_history.append(cost_function(X, y, w, b))
 
         if i % 100 == 0:
-            print(f"Iteration {i:4d}: Cost {J_history[-1]:8.2f}")
+            print(f"Lặp {i:4d}: Chi phí {J_history[-1]:8.2f}")
         
     return w, b, J_history
 
@@ -61,19 +60,17 @@ def mean_squared_error_manual(y_true, y_pred):
     mse = np.sum((y_true - y_pred) ** 2) / n
     return mse
 
-# Function to preprocess the data
+# Hàm tiền xử lý dữ liệu
 def preprocess_data(data):
-    # Mã hóa nhị phân
+    # Mã hóa nhị phân cho các cột dạng yes/no
     data['internet'] = data['internet'].map({'no': 0, 'yes': 1})
     data['famsup'] = data['famsup'].map({'no': 0, 'yes': 1})
     data['schoolsup'] = data['schoolsup'].map({'no': 0, 'yes': 1})
 
-    # studytime giữ nguyên (1-4)
-    # failures giữ nguyên (0-3)
-    # Kiểm tra và xử lý giá trị ngoài khoảng
+    # Giới hạn giá trị cột 'failures' trong khoảng 0-3
     data['failures'] = data['failures'].clip(0, 3)
 
-    # Kiểm tra NaN
+    # Kiểm tra và loại bỏ các dòng có giá trị NaN (không phải số)
     data = data.dropna(subset=['studytime', 'failures', 'famrel', 'health', 'internet', 'absences', 'famsup', 'schoolsup', 'G1', 'G2', 'G3'])
 
     input_features = ['studytime', 'failures', 'famrel', 'health', 'internet', 'absences', 'famsup', 'schoolsup', 'G1', 'G2']
@@ -82,51 +79,47 @@ def preprocess_data(data):
     X = data[input_features].values
     y = data[target_feature].values
 
-    # Chuẩn hóa dữ liệu đầu vào
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
+    return X, y
 
-    return X_scaled, y
-
-
-# Function to train the model
+# Hàm huấn luyện mô hình
 def train_model():
-    # Load dataset
+    # Đọc dữ liệu từ file
     file_path = 'C:/Users/TUS/Downloads/student_grade_prediction/backend/student-mat.csv'
     data = pd.read_csv(file_path)
-    
-    # Preprocess the data
+    # Tiền xử lý dữ liệu
     X, y = preprocess_data(data)
+    print(X)
+    print(y)
 
-    # Split the dataset into training and test sets
+    # Chia dữ liệu thành tập huấn luyện và tập kiểm tra
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # Initialize parameters
+    # Khởi tạo tham số ban đầu
     w_init = np.random.randn(X_train.shape[1]) * 0.01
     b_init = np.random.randn() * 0.01
 
-    # Gradient descent settings
-    alpha = 0.1
+    # Thiết lập tham số cho gradient descent
+    alpha = 0.003
     iterations = 10000
 
-    # Run gradient descent
+    # Thực hiện gradient descent
     w_final, b_final, J_hist = gradient_descent(X_train, y_train, w_init, b_init,
                                                  compute_cost, compute_gradient,
                                                  alpha, iterations)
     
-    print(f"Final w: {w_final}, b: {b_final}")
+    print(f"Trọng số cuối cùng w: {w_final}, b: {b_final}")
     
-    # Evaluate the model on the test set
+    # Đánh giá mô hình trên tập kiểm tra
     y_pred = np.array([predict(x, w_final, b_final) for x in X_test])
     y_pred = np.clip(y_pred, 0, 20)  # Đảm bảo dự đoán nằm trong khoảng 0-20
     
-    # Calculate Mean Squared Error (MSE) for the test set
+    # Tính toán Mean Squared Error (MSE) trên tập kiểm tra
     mse = mean_squared_error_manual(y_test, y_pred)
-    print(f'Mean Squared Error on Test Set: {mse}')
+    print(f'MSE trên tập kiểm tra: {mse}')
     
-    # Save the learned parameters and cost history to a file
+    # Lưu trọng số và lịch sử chi phí vào file
     np.savez('trained_model.npz', w=w_final, b=b_final, cost_history=J_hist)
-    print("Model and cost history saved to 'trained_model.npz'.")
+    print("Đã lưu mô hình và lịch sử chi phí vào 'trained_model.npz'.")
 
-# Run the model training
+# Chạy huấn luyện mô hình
 train_model()
