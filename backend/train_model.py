@@ -67,8 +67,6 @@ def preprocess_data(data):
     data['famsup'] = data['famsup'].map({'no': 0, 'yes': 1})
     data['schoolsup'] = data['schoolsup'].map({'no': 0, 'yes': 1})
 
-    # Giới hạn giá trị cột 'failures' trong khoảng 0-3
-    data['failures'] = data['failures'].clip(0, 3)
 
     # Kiểm tra và loại bỏ các dòng có giá trị NaN (không phải số)
     data = data.dropna(subset=['studytime', 'failures', 'famrel', 'health', 'internet', 'absences', 'famsup', 'schoolsup', 'G1', 'G2', 'G3'])
