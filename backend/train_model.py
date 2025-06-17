@@ -114,17 +114,6 @@ def train_model():
     # Tính toán Mean Squared Error (MSE) trên tập kiểm tra
     mse = mean_squared_error_manual(y_test, y_pred)
     print(f'MSE trên tập kiểm tra: {mse}')
-
-    # Tính MSE khi luôn dự đoán giá trị trung bình của y_test
-    y_mean_pred = np.full_like(y_test, np.mean(y_test))
-    mse_baseline = mean_squared_error_manual(y_test, y_mean_pred)
-    print(f'MSE khi luôn dự đoán giá trị trung bình: {mse_baseline}')
-
-    # So sánh
-    if mse < mse_baseline:
-        print("Mô hình của bạn tốt hơn việc dự đoán trung bình!")
-    else:
-        print("Mô hình của bạn chưa tốt hơn việc dự đoán trung bình.")
     
     # Lưu trọng số và lịch sử chi phí vào file
     np.savez('trained_model.npz', w=w_final, b=b_final, cost_history=J_hist)
